@@ -5,7 +5,14 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class ApiClient {
 
@@ -65,32 +72,31 @@ public class ApiClient {
         HttpResponse<String> response = sendRequest(request);
         LoginResponse loginResponse = gson.fromJson(response.body(), LoginResponse.class);
         return loginResponse.token;
-
     }
 
-    private static class RoomatePreference {
+    private static class RoommatePreference {
         String city;
         Integer minBudget;
         Integer maxBudget;
         String notes;
         boolean lookingForRoommates;
 
-        public RoomatePreference(String city, Integer minBudget,
-                                 Integer maxBudget, String notes, boolean b) {
+        public RoommatePreference(String city, Integer minBudget,
+                                  Integer maxBudget, String notes, boolean b) {
             this.city = city;
             this.minBudget = minBudget;
             this.maxBudget = maxBudget;
             this.notes = notes;
-            lookingForRoommates = b;
+            this.lookingForRoommates = b;
         }
     }
 
-    public void roommatePreference(String city, Integer minBudget, Integer maxBudget,
+    public void roommateProfile(String city, Integer minBudget, Integer maxBudget,
                                    String notes, String token) {
-        RoomatePreference roomatePreference = new RoomatePreference(city, minBudget, maxBudget,
+        RoommatePreference roommatePreference = new RoommatePreference(city, minBudget, maxBudget,
                 notes, true);
 
-        String input = gson.toJson(roomatePreference, RoomatePreference.class);
+        String input = gson.toJson(roommatePreference, RoommatePreference.class);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/roommate/new"))
@@ -101,6 +107,124 @@ public class ApiClient {
 
         sendRequest(request);
     }
+
+    public Roommate getUserInfo(String username, String token) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/roommates/search"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .build();
+
+        HttpResponse<String> response = sendRequest(request);
+
+        JsonArray users = JsonParser.parseString(response.body()).getAsJsonArray();
+        for (JsonElement user : users) {
+            JsonObject userJson = user.getAsJsonObject();
+            String name = userJson.getAsJsonObject("user").get("username").getAsString();
+            if (!name.equalsIgnoreCase(username)) {
+                continue;
+            }
+            long id = userJson.get("id").getAsLong();
+            String city = userJson.get("city").getAsString();
+            int minBudget = userJson.get("minBudget").getAsInt();
+            int maxBudget = userJson.get("maxBudget").getAsInt();
+            return new Roommate(id, name, city, minBudget, maxBudget, "");
+        }
+
+        throw new IllegalArgumentException("User does not exist");
+    }
+
+    private List<Roommate> createRoommateListFromJson(String json) {
+        JsonArray users = JsonParser.parseString(json).getAsJsonArray();
+        List<Roommate> roommates = new ArrayList<>();
+        for (JsonElement user : users) {
+            JsonObject userJson = user.getAsJsonObject();
+            String name = userJson.getAsJsonObject("user").get("username").getAsString();
+            long id = userJson.get("id").getAsLong();
+            String city = userJson.get("city").getAsString();
+            int minBudget = userJson.get("minBudget").getAsInt();
+            int maxBudget = userJson.get("maxBudget").getAsInt();
+            roommates.add(new Roommate(id, name, city, minBudget, maxBudget, ""));
+        }
+        return roommates;
+    }
+
+    public List<Roommate> getReceivedRoommates(String token) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/roommates/history/received"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .build();
+
+        HttpResponse<String> response = sendRequest(request);
+        return this.createRoommateListFromJson(response.body());
+    }
+
+    public List<Roommate> getSentRoommates(String token) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/roommates/history/sent"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .build();
+
+        HttpResponse<String> response = sendRequest(request);
+        return this.createRoommateListFromJson(response.body());
+    }
+
+
+    public List<Roommate> getAcceptedRoommates(String token) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/roommates/history/matches"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .build();
+
+        HttpResponse<String> response = sendRequest(request);
+        return this.createRoommateListFromJson(response.body());
+    }
+
+    public void makeRoommateRequest(long id, String token) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/roommates/request/" + id))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .build();
+
+        sendRequest(request);
+    }
+
+
+    // TO BE IMPLEMENTED
+
+    public List<Roommate> searchRoommates(String token) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/roommates/search"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .build();
+
+        HttpResponse<String> response = sendRequest(request);
+        return this.createRoommateListFromJson(response.body());
+    }
+
+    public List<?> getRoommateRequests(String token) {
+        return null;
+    }
+
+    public List<?> getRecommendations(String token) {
+        return null;
+    }
+
+
+
+    public void acceptRequest(int matchID, String token) {
+
+    }
+
+    public void rejectRequest(int matchID, String token) {
+
+    }
+
 
 
 
