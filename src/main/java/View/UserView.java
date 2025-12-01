@@ -6,17 +6,16 @@ import javax.swing.*;
 
 public class UserView extends JFrame {
 
-    private JButton request;
+    private final JPanel panel;
 
     public UserView(String username, String city, Integer minBudget, Integer maxBudget,
-                    String notes, JButton request) {
+                    String notes) {
 
-        this.request = request;
+        panel = new JPanel();
 
         setTitle("User View");
         setBounds(100, 100, 450, 300);
 
-        JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -38,11 +37,31 @@ public class UserView extends JFrame {
         notesArea.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         panel.add(notesArea);
 
+        getContentPane().add(panel);
+    }
+
+    public UserView(String username, String city, Integer minBudget, Integer maxBudget,
+                    String notes, JButton request) {
+
+        this(username, city, minBudget, maxBudget, notes);
+
         // Request button
         request.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(Box.createVerticalStrut(10));
         panel.add(request);
-
-        getContentPane().add(panel);
     }
+
+    public UserView(String username, String city, Integer minBudget, Integer maxBudget,
+                    String notes, JButton accept, JButton reject) {
+
+        this(username, city, minBudget, maxBudget, notes);
+
+        // Accept/Reject Button
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+        buttonPanel.add(accept);
+        buttonPanel.add(reject);
+        panel.add(buttonPanel);
+    }
+
 }

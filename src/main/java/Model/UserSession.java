@@ -1,28 +1,38 @@
 package Model;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class UserSession {
     private String sessionToken;
     private ApiClient apiClient;
-    private Dashboard dashboard;
+    private String username;
 
     public UserSession(String baseUrl) {
         apiClient = new ApiClient(baseUrl);
     }
 
+    public void register(String username, String password, String email) {
+        apiClient.register(username, password, email);
+    }
 
     public void login(String username, String password) {
+        this.username = username;
         sessionToken = apiClient.login(username, password);
     }
 
-    public void setRoommateProfile(String city, Integer minBudget, Integer maxBudget,
-                                   String notes) {
-        apiClient.roommateProfile(city, minBudget, maxBudget, notes, this.sessionToken);
+    public void logout() {
+        sessionToken = null;
+        username = null;
     }
 
-    public List<?> getRoommateRequests() {
-        return apiClient.getRoommateRequests(this.sessionToken);
+    public void setRoommateProfile(String city, Integer minBudget, Integer maxBudget,
+                                   String notes, List<Integer> value) {
+        apiClient.roommateProfile(city, minBudget, maxBudget, notes, value, this.sessionToken);
+    }
+
+    public List<Roommate> filterOutThisUser(List<Roommate> roommates) {
+        return roommates.stream().filter(r -> !r.getName().equals(username)).toList();
     }
 
     public List<Roommate> getAcceptedRoommates() {
@@ -47,11 +57,23 @@ public class UserSession {
     }
 
     public void makeRoommateRequest(long id) {
-        this.apiClient.makeRoommateRequest(id, this.sessionToken);
+        this.apiClient.makeRoommateRequest(id, username, this.sessionToken);
     }
 
     public List<Roommate> search() {
         return this.apiClient.searchRoommates(this.sessionToken);
+    }
+
+    public List<Roommate> getRecommendations() {
+        return this.apiClient.getRecommendations(this.sessionToken);
+    }
+
+    public void acceptRoommateRequest(long id) {
+        this.apiClient.acceptRequest(id, this.sessionToken);
+    }
+
+    public void rejectRoommateRequest(long id) {
+        this.apiClient.rejectRequest(id, this.sessionToken);
     }
 
 

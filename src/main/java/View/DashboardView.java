@@ -12,15 +12,23 @@ public class DashboardView extends JFrame {
     private final JPanel acceptedPanel;
     private final JPanel incomingPanel;
     private final JPanel outgoingPanel;
+    private final JButton refreshButton;
+    private final JButton logoutButton;
 
     private JPanel panel;
 
     private final RoommateProfileView profileView;
     private final SearchView searchView;
+    private final RecView recView;
 
-    public DashboardView(RoommateProfileView roommateProfileView, SearchView searchView) {
+    public DashboardView(RoommateProfileView roommateProfileView, SearchView searchView,
+                         RecView recView,
+                         JButton refreshButton, JButton logoutButton) {
         this.profileView = roommateProfileView;
         this.searchView = searchView;
+        this.recView = recView;
+        this.refreshButton = refreshButton;
+        this.logoutButton = logoutButton;
         acceptedPanel = new JPanel();
         incomingPanel = new JPanel();
         outgoingPanel = new JPanel();
@@ -58,6 +66,7 @@ public class DashboardView extends JFrame {
         JButton createBtn = new JButton("Create Roommate Profile");
         createBtn.addActionListener(e -> replaceContent(profileView));
         JButton recBtn = new JButton("Get Recommendations");
+        recBtn.addActionListener(e -> replaceContent(recView));
         JButton searchBtn = new JButton("Search Roommates");
         searchBtn.addActionListener(e -> replaceContent(searchView));
 
@@ -65,6 +74,10 @@ public class DashboardView extends JFrame {
         recBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         searchBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        rightPanel.add(Box.createVerticalStrut(10));
+        rightPanel.add(this.refreshButton);
+        rightPanel.add(Box.createVerticalStrut(10));
+        rightPanel.add(this.logoutButton);
         rightPanel.add(Box.createVerticalStrut(10));
         rightPanel.add(createBtn);
         rightPanel.add(Box.createVerticalStrut(10));
@@ -107,6 +120,10 @@ public class DashboardView extends JFrame {
 
     public void updateSearch(List<JButton> searchResults) {
         this.searchView.updateResultPanel(searchResults);
+    }
+
+    public void updateRec(List<JButton> searchResults) {
+        this.recView.updateResultPanel(searchResults);
     }
 
     private void replaceContent(JPanel panel) {

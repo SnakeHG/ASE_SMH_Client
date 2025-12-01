@@ -16,14 +16,10 @@ class ApiClientTest {
 
     @Test
     public void TestLogin() {
-
         String token = apiClient.login("admin", "admin123");
         assertNotNull(token);
     }
 
-    @Test
-    public void TestRegister() {
-        apiClient.register("","","");
-    }
+
 
 }

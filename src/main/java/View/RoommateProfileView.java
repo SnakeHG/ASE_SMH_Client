@@ -1,6 +1,7 @@
 package View;
 
 import java.awt.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
@@ -14,6 +15,7 @@ public class RoommateProfileView extends JPanel {
     private final JTextField minBudgetField;
     private final JTextField maxBudgetField;
     private final JTextArea notesArea;
+    private final List<JSpinner> personality;
     private final JButton btn;
     private final JButton btn2;
 
@@ -21,12 +23,15 @@ public class RoommateProfileView extends JPanel {
                                JTextField minBudgetField,
                                JTextField maxBudgetField,
                                JTextArea notesArea,
+                               List<JSpinner> personalityQuestions,
+                               String[] questions,
                                JButton btn,
                                JButton cancelButton) {
         this.cityField = cityField;
         this.minBudgetField = minBudgetField;
         this.maxBudgetField = maxBudgetField;
         this.notesArea = notesArea;
+        this.personality = personalityQuestions;
         this.btn = btn;
         this.btn2 = cancelButton;
 
@@ -40,6 +45,8 @@ public class RoommateProfileView extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
 
         // Row 1: City
         gbc.gridx = 0;
@@ -77,6 +84,29 @@ public class RoommateProfileView extends JPanel {
         JScrollPane scroll = new JScrollPane(notesArea);
         formPanel.add(scroll, gbc);
 
+        // Row 5/6 personality
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(new JLabel("Personality Questions (Answer from 1-10):"), gbc);
+
+        gbc.gridy = 5;
+        gbc.fill = GridBagConstraints.NONE;
+        JPanel personalityPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints pg = new GridBagConstraints();
+        pg.insets = new Insets(3, 3, 3, 3);
+        pg.anchor = GridBagConstraints.WEST;
+
+        for (int i = 0; i < personalityQuestions.size(); i++) {
+            pg.gridx = 0;
+            pg.gridy = i;
+            JPanel questionPanel = new JPanel(new BorderLayout(10, 0));
+            questionPanel.add(new JLabel(questions[i]), BorderLayout.WEST);
+            questionPanel.add(personality.get(i), BorderLayout.EAST);
+            personalityPanel.add(questionPanel, pg);
+        }
+        formPanel.add(personalityPanel, gbc);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(btn);
